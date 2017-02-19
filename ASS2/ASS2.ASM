@@ -17,38 +17,21 @@ main:
 
         MOV    ax, dx
 
-        MOV    cx, 80
-
-        call   testt
-
-        .exit
-
-testt proc near uses cx,ax
+        MOV    cx, 80           ; loop for 80 times
 lp:
         PUSH   cx
+        call   rand80
 
-        MOV    cx, 21           ; linear congruent generator
-        MUL    cx
-        ADD    ax, 17
-
-        MOV    cx, 80           ; mod 80
-        XOR    dx, dx
-        DIV    cx
-
-        ; MOV    ax, dx
-        ; PUSH   ax
-        ; PUSH   dx
-
+        PUSH   ax
         PUSH   dx
 
         MOV    ah, 02h          ; move cursor to column
         MOV    dh, 0
-        MOV    dl, col
+        ; MOV    dl, col        ; move cursor to random position
         MOV    bh, 0
         INT    10h
 
         POP    dx
-        PUSH   dx
 
         MOV    ah, 0Ah          ; print character
         MOV    al, dl
@@ -67,7 +50,40 @@ lp:
         INC    col
         POP    cx
         LOOP   lp
-testt endp
 
-RET
-END    main
+        .exit
+
+rand80 proc near uses ax cx dx
+
+        MOV    cx, 41           ; linear congruent generator
+        MUL    cx
+        ADD    ax, 27
+
+        MOV    cx, 80           ; mod 80
+        XOR    dx, dx
+        DIV    cx
+
+        MOV    ax, dx
+
+        RET
+
+rand80 endp
+
+rand94 proc near uses ax cx dx
+
+        MOV    cx, 95           ; linear congruent generator
+        MUL    cx
+        ADD    ax, 17
+
+        MOV    cx, 94           ; mod 80
+        XOR    dx, dx
+        DIV    cx
+
+        MOV    ax, dx
+
+        RET
+
+rand94 endp
+
+        RET
+        END    main
