@@ -19,6 +19,11 @@ main:
 
         MOV    cx, 80
 
+        call   testt
+
+        .exit
+
+testt proc near uses cx,ax
 lp:
         PUSH   cx
 
@@ -38,7 +43,7 @@ lp:
 
         MOV    ah, 02h          ; move cursor to column
         MOV    dh, 0
-        ; MOV    dl, dl
+        MOV    dl, col
         MOV    bh, 0
         INT    10h
 
@@ -58,9 +63,11 @@ lp:
         INT    15h
 
         POP    ax
+
         INC    col
         POP    cx
         LOOP   lp
+testt endp
 
-        RET
-        END    main
+RET
+END    main
