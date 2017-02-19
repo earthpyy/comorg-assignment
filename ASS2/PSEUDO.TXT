@@ -1,0 +1,17 @@
+n = 80;
+while (n >= 1) {	// TODO : make it infinite loop
+	rnd = rand80();
+	arr[rnd] = 0;
+	nn = 3;
+	while (nn >= 1) {	// rptlp
+		for (i = 0; i < 80; i++) {	// chklp
+			if (arr[i] >= 0) {
+				for (j = 0; j <= arr[i]; j++) {	// pntlp
+					move cursor to j, i;
+					print rand94();
+	            }
+				arr[i]++;
+	        }
+		}
+    }
+}
