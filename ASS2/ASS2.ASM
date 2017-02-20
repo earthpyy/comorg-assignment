@@ -3,9 +3,10 @@
         .data
 arrs    DB     80 DUP(-1)
 arre    DB     80 DUP(-1)
-seed    DB     ?
-seed2   DB     ?
-seed3   DB     ?
+arrd    DB     80 DUP(0)
+seed80  DB     ?
+seed94  DB     ?
+seed10  DB     ?
 color   DB     0Fh, 0Ah, 02h, 07h, 08h
 ; color   DB     8, 7, 2, 10, 15
 
@@ -24,25 +25,25 @@ main:
 
         MOV    ah, 00h          ; get system time as seed
         INT    1Ah
-        MOV    seed, dl
+        MOV    seed80, dl
 
         MOV    ah, 86h          ; delay
         MOV    cx, 00h
         MOV    dx, 050h
         INT    15h
 
-        MOV    ah, 00h          ; get system time as seed2
+        MOV    ah, 00h          ; get system time as seed94
         INT    1Ah
-        MOV    seed2, dl
+        MOV    seed94, dl
 
         MOV    ah, 86h          ; delay
         MOV    cx, 00h
         MOV    dx, 050h
         INT    15h
 
-        MOV    ah, 00h          ; get system time as seed2
+        MOV    ah, 00h          ; get system time as seed94
         INT    1Ah
-        MOV    seed3, dl
+        MOV    seed10, dl
 
         ; MOV    cx, 80           ; loop for 80 times
 mnlp:
@@ -50,10 +51,10 @@ mnlp:
         CALL   rand80          ; TODO
 
         CALL   rand10
-        MOV    cl, seed3
+        MOV    cl, seed10
 
         MOV    bh, 00h
-        MOV    bl, seed
+        MOV    bl, seed80
         MOV    di, bx
 
         MOV    [arrs + di], cl
@@ -68,7 +69,7 @@ chklp:
 
         MOV    di, i
         CMP    [arrs + di], -1
-        JE     ctn2
+        JE     dctn2
 
         MOV    di, i
         MOV    bh, 00h
@@ -85,10 +86,21 @@ pntlp:
         INT    10h
 
         CALL   rand94
-        CALL   pntColor
         MOV    ah, 09h          ; print character
-        MOV    al, seed2
+
+        MOV    di, i
+        CMP    [arrd + di], 1
+        JE     inv
+
+        CALL   pntColor
+        MOV    al, seed94
         ADD    al, 33
+        JMP    cont
+inv:
+        MOV    al, 0
+        MOV    bl, 00h
+
+cont:
         MOV    bh, 0
         ; MOV    bl, 0Fh
         MOV    cx, 1
@@ -115,6 +127,8 @@ pntlp:
 
 ; ---------- dummy ----------
         JMP    skip
+dctn2:
+        JMP    ctn2
 dmnlp:
         JMP    mnlp
 drptlp:
@@ -125,12 +139,40 @@ skip:
 ; ---------- dummy ----------
 
 reset:
+        MOV    di, i
+        NOT    [arrd + di]
+        AND    [arrd + di], 01h
+
+        MOV    di, i
+        CMP    [arrd + di], 1
+        JMP    reset2
+
         ; CALL   rand10
-        ; MOV    di, i
-        ; MOV    bl, seed3
-        ; MOV    [arr + di], bl
+        ; MOV    bl, seed10
+        MOV    di, i
         MOV    [arrs + di], -1
+        MOV    di, i
         MOV    [arre + di], -1
+
+        JMP    cont2
+
+
+reset2:
+        MOV    di, i
+        MOV    bl, [arre + di]
+        SUB    bl, 14
+        MOV    di, i
+        MOV    [arrs + di], bl
+        MOV    di, i
+        MOV    [arre + di], bl
+        ; JMP    cont2
+
+cont2:
+        MOV    di, i
+        MOV    bh, 00h
+        MOV    bl, [arrs + di]
+        MOV    j, bx
+        MOV    cnt, 0
 
         ; JMP    ctn3
 
@@ -161,7 +203,7 @@ ctn1:
 rand10 proc near uses ax cx dx
 
         MOV    ah, 00h
-        MOV    al, seed3
+        MOV    al, seed10
 
         MOV    cx, 11           ; linear congruent generator
         MUL    cx
@@ -171,7 +213,7 @@ rand10 proc near uses ax cx dx
         XOR    dx, dx
         DIV    cx
 
-        MOV    seed3, dl
+        MOV    seed10, dl
 
         RET
 
@@ -180,7 +222,7 @@ rand10 endp
 rand80 proc near uses ax cx dx
 
         MOV    ah, 00h
-        MOV    al, seed
+        MOV    al, seed80
 
         MOV    cx, 21           ; linear congruent generator
         MUL    cx
@@ -190,7 +232,7 @@ rand80 proc near uses ax cx dx
         XOR    dx, dx
         DIV    cx
 
-        MOV    seed, dl
+        MOV    seed80, dl
 
         RET
 
@@ -199,7 +241,7 @@ rand80 endp
 ; rand80n proc near uses ax cx dx
 ;
 ;         MOV    ah, 00h
-;         MOV    al, seed
+;         MOV    al, seed80
 ;
 ;         MOV    ah, 00h          ; get system time
 ;         INT    1Ah
@@ -212,7 +254,7 @@ rand80 endp
 ;         XOR    dx, dx
 ;         DIV    cx
 ;
-;         MOV    seed, dl
+;         MOV    seed80, dl
 ;
 ;         RET
 ;
@@ -221,7 +263,7 @@ rand80 endp
 rand94 proc near uses ax cx dx
 
         MOV    ah, 00h
-        MOV    al, seed2
+        MOV    al, seed94
 
         MOV    cx, 95           ; linear congruent generator
         MUL    cx
@@ -231,7 +273,7 @@ rand94 proc near uses ax cx dx
         XOR    dx, dx
         DIV    cx
 
-        MOV    seed2, dl
+        MOV    seed94, dl
 
         RET
 
