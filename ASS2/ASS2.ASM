@@ -34,7 +34,7 @@ mnlp:
         MOV    bh, 00h
         MOV    bl, seed
         MOV    di, bx
-        MOV    [arr + bx], 0
+        MOV    [arr + di], 0
 
         MOV    cx, 2            ; do it 3 times
 rptlp:
@@ -68,10 +68,11 @@ pntlp:
         INT    10h
 
         CALL   rand94
-        MOV    ah, 0Ah          ; print character
+        MOV    ah, 09h          ; print character
         MOV    al, seed2
         ADD    al, 33
         MOV    bh, 0
+        MOV    bl, 0Fh
         MOV    cx, 1
         INT    10h
 
