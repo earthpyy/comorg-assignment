@@ -4,7 +4,7 @@
 delayc  DW     00h
 delayd  DW     00h
 
-len     DB     20
+len     DB     20       ; >= 8
 
 rptN    DW     15
 
@@ -338,10 +338,14 @@ rand94 endp
 
 pntColor proc near uses bl
 
-        CMP    cnt, 13
+        MOV    bl, len
+        SUB    bl, 2
+        CMP    cnt, bl
         JGE    pnt0
 
-        CMP    cnt, 10
+        MOV    bl, len
+        SUB    bl, 5
+        CMP    cnt, bl
         JGE    pnt1
 
         CMP    cnt, 2
