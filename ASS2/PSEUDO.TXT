@@ -15,3 +15,19 @@ while (n >= 1) {	// TODO : make it infinite loop
 		}
     }
 }
+
+
+// ---- COLOR ----
+// D-Dark, Gy-Grey, Gr-Green, Gl-LightGreen, W-White
+// D Gy Gr Gr Gr Gr Gr Gr Gr Gr Gl Gl Gl W W
+
+if (cnt >= 13)
+	pntDark();
+else if (cnt >= 11)
+	pntGrey();
+else if (cnt >= 5)
+	pntGreen();
+else if (cnt >= 2)
+	pntLGreen();
+else
+	pntWhite();
