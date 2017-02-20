@@ -9,7 +9,6 @@ cnt     DB     0
 
 i       DW     ?
 j       DW     ?
-tmp     DW     ?
 
         .code
         ORG    0100h
@@ -19,20 +18,18 @@ main:
         MOV    al, 03h
         INT    10h
 
-        MOV    ah, 00h          ; get system time
+        MOV    ah, 00h          ; get system time as seed
         INT    1Ah
-
         MOV    seed, dl
 
-        MOV    ah, 00h          ; get system time #2
+        MOV    ah, 00h          ; get system time as seed2
         INT    1Ah
-
         MOV    seed2, dl
 
         ; MOV    cx, 80           ; loop for 80 times
-mainlp:
+mnlp:
         ; PUSH   cx
-        CALL   rand80
+        CALL   rand80          ; TODO
 
         MOV    bh, 00h
         MOV    bl, seed
@@ -50,12 +47,12 @@ chklp:
         CMP    [arr + di], -1
         JE     ctn2
 
-; ---- dummy ----
+; ---------- dummy ----------
         JMP    skip
-dummy:
-        JMP    mainlp
+dmnlp:
+        JMP    mnlp
 skip:
-; ---- dummy ----
+; ---------- dummy ----------
 
         MOV    j, 0
 pntlp:
@@ -80,10 +77,10 @@ pntlp:
 
         INC    j
 
-        ; MOV    ah, 86h          ; delay
-        ; MOV    cx, 00h
-        ; MOV    dx, 05000h
-        ; INT    15h
+        MOV    ah, 86h          ; delay
+        MOV    cx, 00h
+        MOV    dx, 0500h
+        INT    15h
 
         MOV    di, i
         MOV    bh, 00h
@@ -112,29 +109,8 @@ ctn1:
         LOOP   rptlp
 ; end rptlp loop
 
-        ; MOV    ah, 02h          ; move cursor to column
-        ; MOV    dx, seed        ; move cursor to random position
-        ; MOV    dh, 0
-        ; MOV    bh, 0
-        ; INT    10h
-        ;
-        ; MOV    ax, seed
-        ;
-        ; MOV    ah, 0Ah          ; print character
-        ; ADD    al, 33
-        ; MOV    bh, 0
-        ; MOV    cx, 1
-        ; INT    10h
-        ;
-        ; MOV    ah, 86h          ; delay
-        ; MOV    cx, 02h
-        ; MOV    dx, 00h
-        ; INT    15h
-
-        ; INC    col              ; col++
-        ; POP    cx
-        JMP   dummy
-; end mainlp loop
+        JMP   dmnlp
+; end mnlp loop
 
         .exit
 
@@ -143,9 +119,9 @@ rand80 proc near uses ax cx dx
         MOV    ah, 00h
         MOV    al, seed
 
-        MOV    cx, 41           ; linear congruent generator
+        MOV    cx, 21           ; linear congruent generator
         MUL    cx
-        ADD    ax, 27
+        ADD    ax, 77
 
         MOV    cx, 80           ; mod 80
         XOR    dx, dx
@@ -157,26 +133,31 @@ rand80 proc near uses ax cx dx
 
 rand80 endp
 
-rand80n proc near uses ax cx dx
-
-        MOV    al, seed
-
-        MOV    cx, 41           ; linear congruent generator
-        MUL    cx
-        ADD    ax, 27
-
-        MOV    cx, 80           ; mod 80
-        XOR    dx, dx
-        DIV    cx
-
-        MOV    seed, dl
-
-        RET
-
-rand80n endp
+; rand80n proc near uses ax cx dx
+;
+;         MOV    ah, 00h
+;         MOV    al, seed
+;
+;         MOV    ah, 00h          ; get system time
+;         INT    1Ah
+;
+;         MUL    dl
+;         MOV    al, ah
+;         MOV    ah, dl
+;
+;         MOV    cx, 80           ; mod 80
+;         XOR    dx, dx
+;         DIV    cx
+;
+;         MOV    seed, dl
+;
+;         RET
+;
+; rand80n endp
 
 rand94 proc near uses ax cx dx
 
+        MOV    ah, 00h
         MOV    al, seed2
 
         MOV    cx, 95           ; linear congruent generator
