@@ -12,6 +12,7 @@ color   DB     0Fh, 0Ah, 02h, 07h, 08h
 i       DW     ?
 j       DW     ?
 n       DW     ?
+cnt     DB     ?
 
         .code
         ORG    0100h
@@ -55,7 +56,8 @@ mnlp:
         MOV    bl, seed
         MOV    di, bx
 
-        MOV    [arr + di], cl
+        MOV    [arrs + di], cl
+        MOV    [arre + di], cl
 
         MOV    n, 0            ; do it 3 times
 rptlp:
@@ -65,25 +67,14 @@ rptlp:
 chklp:
 
         MOV    di, i
-        CMP    [arr + di], -1
+        CMP    [arrs + di], -1
         JE     ctn2
 
         MOV    di, i
         MOV    bh, 00h
-        MOV    bl, [arr + di]
+        MOV    bl, [arrs + di]
         MOV    j, bx
-
-; ---------- dummy ----------
-        JMP    skip
-dmnlp:
-        JMP    mnlp
-drptlp:
-        JMP    rptlp
-dchklp:
-        JMP    chklp
-skip:
-; ---------- dummy ----------
-
+        MOV    cnt, 0
 pntlp:
 
         MOV    ah, 02h          ; move cursor to column
@@ -106,35 +97,46 @@ pntlp:
         INC    j
 
         MOV    ah, 86h          ; delay
-        MOV    cx, 01h
-        MOV    dx, 00h
+        MOV    cx, 00h
+        MOV    dx, 0500h
         INT    15h
+
+        INC    cnt
+        CMP    cnt, 15
+        JGE    reset
 
         MOV    di, i
         MOV    bh, 00h
-        MOV    bl, [arr + di]
-
-        CMP    j, 20
-        JGE    reset
-
-        ; CMP    j, 1
+        MOV    bl, [arre + di]
         CMP    j, bx
         JLE    pntlp
         JMP    ctn3
 ; end pntlp loop
+
+; ---------- dummy ----------
+        JMP    skip
+dmnlp:
+        JMP    mnlp
+drptlp:
+        JMP    rptlp
+dchklp:
+        JMP    chklp
+skip:
+; ---------- dummy ----------
 
 reset:
         ; CALL   rand10
         ; MOV    di, i
         ; MOV    bl, seed3
         ; MOV    [arr + di], bl
-        MOV    [arr + di], -1
+        MOV    [arrs + di], -1
+        MOV    [arre + di], -1
 
         ; JMP    ctn3
 
 ctn3:
         MOV    di, i
-        INC    [arr + di]
+        INC    [arre + di]
 
 ctn2:
         INC    i
@@ -163,7 +165,7 @@ rand10 proc near uses ax cx dx
 
         MOV    cx, 11           ; linear congruent generator
         MUL    cx
-        ADD    ax, 7
+        ADD    ax, 3
 
         MOV    cx, 10           ; mod 94
         XOR    dx, dx
@@ -237,16 +239,16 @@ rand94 endp
 
 pntColor proc near uses bx
 
-        CMP    j, 18
+        CMP    cnt, 13
         JGE    pnt0
 
-        CMP    j, 15
+        CMP    cnt, 10
         JGE    pnt1
 
-        CMP    j, 2
+        CMP    cnt, 2
         JGE    pnt2
 
-        CMP    j, 1
+        CMP    cnt, 1
         JGE    pnt3
 
         JMP    pnt4
