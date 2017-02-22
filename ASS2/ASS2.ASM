@@ -6,16 +6,18 @@ delayd  DW     00h
 
 len     DB     20       ; >= 8
 
-rptN    DW     15
+rptN    DW     5
 
 a94     DW     95
 c94     DW     17
 
-a80     DW     21
+a80     DW     41
 c80     DW     77
 
 a10     DW     11
 c10     DW     3
+
+color   DB     0Fh, 0Ah, 02h, 07h, 08h
 
 
 arrs    DB     80 DUP(-1)
@@ -24,7 +26,7 @@ arrd    DB     80 DUP(0)
 seed80  DB     ?
 seed94  DB     ?
 seed10  DB     ?
-color   DB     0Fh, 0Ah, 02h, 07h, 08h
+
 
 i       DW     ?
 j       DW     ?

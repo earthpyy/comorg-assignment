@@ -1,20 +1,51 @@
-n = 80;
-while (n >= 1) {	// TODO : make it infinite loop
+while (1) {	// TODO : make it infinite loop
 	rnd = rand80();
-	arr[rnd] = 0;
-	nn = 3;
-	while (nn >= 1) {	// rptlp
+	arrs[rnd] = seed10;
+	arre[rnd] = seed10;
+	rptN = 3;
+	while (rptN) {	// rptlp
 		for (i = 0; i < 80; i++) {	// chklp
 			if (arr[i] >= 0) {
 				for (j = 0; j <= arr[i]; j++) {	// pntlp
 					move cursor to j, i;
 					print rand94();
 	            }
-				arr[i]++;
+				arre[i]++;
 	        }
 		}
     }
 }
+
+
+byte a
+
+MOV al, a
+
+MOV ah, 00h
+MOV al, a
+
+MOV arrw, ax
+
+word a
+
+MOV ax, a
+MOV arrb, al
+
+
+
+JMP
+
+JL - less
+JLE - less e
+JG - greater
+JGE
+JNZ - not zero
+
+JE - equal
+
+move cursor : 10h 02h
+print char : 10h 09h
+delay : 15h 86h
 
 
 // ---- COLOR ----
