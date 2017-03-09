@@ -1,64 +1,37 @@
-while (1) {	// TODO : make it infinite loop
-	rnd = rand80();
-	arrs[rnd] = seed10;
-	arre[rnd] = seed10;
-	rptN = 3;
-	while (rptN) {	// rptlp
-		for (i = 0; i < 80; i++) {	// chklp
-			if (arr[i] >= 0) {
-				for (j = 0; j <= arr[i]; j++) {	// pntlp
-					move cursor to j, i;
-					print rand94();
-	            }
-				arre[i]++;
-	        }
+main:
+	getSystemTimeAsSeed()
+	LOOP forever {
+		SET startRow/endRow of rand80() = rand10()
+		LOOP i (0 to 79) {
+			if (startRow != -1) {
+				LOOP until printed all character in row {
+					SET j = startRow
+					move cursor to (j, i)
+					if (printDone) {
+						printBlankChar()
+					} else {
+						printWithColor(selectColor(), rand94())
+					}
+					j++;
+				}
+				printDone = true;
+				SET startRow/endRow of i to original start/end position
+			}
 		}
-    }
-}
+		printDummyChar(5000 - printedAmount)
+	}
 
+rand:
+	newSeed = ((a * lastSeed) + c) % m
 
-byte a
-
-MOV al, a
-
-MOV ah, 00h
-MOV al, a
-
-MOV arrw, ax
-
-word a
-
-MOV ax, a
-MOV arrb, al
-
-
-
-JMP
-
-JL - less
-JLE - less e
-JG - greater
-JGE
-JNZ - not zero
-
-JE - equal
-
-move cursor : 10h 02h
-print char : 10h 09h
-delay : 15h 86h
-
-
-// ---- COLOR ----
-// D-Dark, Gy-Grey, Gr-Green, Gl-LightGreen, W-White
-// D Gy Gr Gr Gr Gr Gr Gr Gr Gr Gl Gl Gl W W
-
-if (cnt >= 13)
-	pntDark();
-else if (cnt >= 11)
-	pntGrey();
-else if (cnt >= 5)
-	pntGreen();
-else if (cnt >= 2)
-	pntLGreen();
-else
-	pntWhite();
+selectColor: (length = 15)
+	if (count >= 13)
+		color = WHITE
+	else if (count >= 10)
+		color = LIGHTGREEN
+	else if (count >= 2)
+		color = GREEN
+	else if (count >= 1)
+		color = LIGHTGREY
+	else
+		color = DARKGREY

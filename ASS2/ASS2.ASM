@@ -8,7 +8,7 @@ len     DB     15       ; [8, 25] (default: 15)
 ; repeat n time(s) then new column begin
 rptN    DW     10       ; default: 10
 
-; variables in linear congruent generator
+; variables in linear congruential generator
 a80     DW     81       ; a (default: 81)
 c80     DW     17       ; c (default: 17)
 a10     DW     11       ; a (default: 11)
@@ -242,7 +242,7 @@ rand10:
         MOV    ah, 00h
         MOV    al, seed10
 
-        MOV    cx, a10           ; linear congruent generator
+        MOV    cx, a10           ; linear congruential generator
         MUL    cx
         ADD    ax, c10
 
@@ -259,7 +259,7 @@ rand80:
         MOV    ah, 00h
         MOV    al, seed80
 
-        MOV    cx, a80           ; linear congruent generator
+        MOV    cx, a80           ; linear congruential generator
         MUL    cx
         ADD    ax, c80
 
@@ -276,7 +276,7 @@ rand94:
         MOV    ah, 00h
         MOV    al, seed94
 
-        MOV    cx, 95           ; linear congruent generator
+        MOV    cx, 95           ; linear congruential generator
         MUL    cx
         ADD    ax, 17
 
