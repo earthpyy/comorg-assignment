@@ -1,5 +1,16 @@
         .model tiny
 
+C = 2280
+Ck = 2152
+D = 2031
+Dk = 1917
+E = 1809
+F = 1715
+Fk = 1612
+G = 1521
+A = 1355
+B = 1207
+
         .data
 ;------------------- SETTING -------------------
 ; delay
@@ -35,11 +46,9 @@ tittxt  DB     '                  _|_|    _|        _|_|_|    _|    _|    _|_|  
         DB     '     _|        _|    _|  _|    _|  _|    _|      _|      _|        _|    _|    ', 0
         DB     '       _|_|    _|_|_|_|  _|    _|  _|    _|      _|      _|_|_|    _|_|_|      ', 0
         DB     '           _|  _|    _|  _|    _|  _|    _|      _|      _|        _|    _|    ', 0
-        DB     '     _|_|_|    _|    _|    _|_|      _|_|        _|      _|_|_|_|  _|    _|    ', 0
-        DB     '                                                                               ', 0
-        DB     '                                                                               ', 0
-        DB     '                                                                               ', 0
-        DB     '                          press any key to continue                            $', 0
+        DB     '     _|_|_|    _|    _|    _|_|      _|_|        _|      _|_|_|_|  _|    _|    $', 0
+
+anyk    DB     '                          press any key to continue                            $', 0
 
 modetxt DB     '                    _   _   _   _     _   _   _   _   _   _                    ', 0
         DB     '                   / \ / \ / \ / \   / \ / \ / \ / \ / \ / \                   ', 0
@@ -59,6 +68,48 @@ modetxt DB     '                    _   _   _   _     _   _   _   _   _   _     
         DB     '                                                                               ', 0
         DB     '                                                                               ', 0
         DB     '                         ALPHA SHOOTER  Copyright 2017                         $', 0
+
+starttune DW     E, 5
+        DW     D, 2
+        DW     C, 4
+        DW     D, 4
+        DW     E, 4
+        DW     Dk, 1
+        DW     E, 4
+        DW     Dk, 1
+        DW     E, 8
+
+        DW     D, 4
+        DW     Ck, 1
+        DW     D, 4
+        DW     Ck, 1
+        DW     D, 8
+
+        DW     E, 4
+        DW     G, 4
+        DW     Fk, 1
+        DW     G, 8
+
+        DW     00h, 00h
+
+overtune DW     E, 5
+        DW     D, 2
+        DW     C, 4
+        DW     D, 4
+        DW     E, 4
+        DW     Dk, 1
+        DW     E, 4
+        DW     Dk, 1
+        DW     E, 8
+
+        DW     D, 4
+        DW     Ck, 1
+        DW     D, 4
+        DW     E, 4
+        DW     D, 4
+        DW     C, 8
+
+        DW     00h, 00h
 
 arrs    DB     80 DUP(-1)
 arre    DB     80 DUP(-1)
@@ -649,6 +700,18 @@ printtitle:
         MOV     dx, offset tittxt
         INT     21h
 
+        CALL   startsound
+
+        MOV    ah, 02h          ; move cursor to
+        MOV    dl, 0           ;     column 0
+        MOV    dh, 21           ;     row 21
+        MOV    bh, 0
+        INT    10h
+
+        MOV     ah, 09h
+        MOV     dx, offset anyk
+        INT     21h
+
 pntany:
         MOV    ah, 02h          ; move cursor to
         MOV    dl, 51           ;     column 51
@@ -799,6 +862,46 @@ checkdown:
 checkenter:
         CMP    al, 13           ; carriage return
         JNE    inflp
+
+        RET
+
+startsound:
+        push ds
+        pop  es
+        mov  si, offset starttune
+
+        mov  dx,61h                  ; turn speaker on
+        in   al,dx                   ;
+        or   al,03h                  ;
+        out  dx,al                   ;
+        mov  dx,43h                  ; get the timer ready
+        mov  al,0B6h                 ;
+        out  dx,al                   ;
+
+LoopIt: lodsw                        ; load desired freq.
+        or   ax,ax                   ; if freq. = 0 then done
+        jz   short LDone             ;
+        mov  dx,42h                  ; port to out
+        out  dx,al                   ; out low order
+        xchg ah,al                   ;
+        out  dx,al                   ; out high order
+        lodsw                        ; get duration
+        mov  cx,ax                   ; put it in cx (16 = 1 second)
+        call PauseIt                 ; pause it
+        jmp  short LoopIt
+
+LDone:  mov  dx,61h                  ; turn speaker off
+        in   al,dx                   ;
+        and  al,0FCh                 ;
+        out  dx,al                   ;
+
+        RET
+
+PauseIt:
+        MOV    ah, 86h
+        ; MOV    cx, 00h
+        MOV    dx, 00h
+        INT    15h
 
         RET
 
