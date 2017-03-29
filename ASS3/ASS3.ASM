@@ -1,32 +1,36 @@
         .model tiny
 
+Bj = 2415       ; B low
 C = 2280
-Ck = 2152
+Ck = 2152       ; C#
 D = 2031
-Dk = 1917
+Dk = 1917       ; D#
 E = 1809
 F = 1715
-Fk = 1612
+Fk = 1612       ; F#
 G = 1521
 A = 1355
 B = 1207
 
         .data
 ;------------------- SETTING -------------------
+
 ; delay
-delay   DW     05h
+easydelay       DW     04h
+mediumdelay     DW     02h
+harddelay       DW     01h
 
 ; length of matrix
 len     DB     23       ; [8, 25] (default: 15)
 
 ; repeat n time(s) then new column begin
-rptN    DW     4       ; default: 10
+rptN    DW     3       ; default: 10
 
 ; variables in linear congruential generator
 a80     DW     81       ; a (default: 81)
 c80     DW     17       ; c (default: 17)
-a10     DW     11       ; a (default: 11)
-c10     DW     3        ; c (default: 3)
+a36     DW     37       ; a (default: 37)
+c36     DW     7       ; c (default: 11)
 
 ; colors of matrix
 color   DB     0Fh, 0Ah, 02h, 07h, 08h
@@ -68,6 +72,11 @@ modetxt DB     '                    _   _   _   _     _   _   _   _   _   _     
         DB     '                                                                               ', 0
         DB     '                                                                               ', 0
         DB     '                         ALPHA SHOOTER  Copyright 2017                         $', 0
+
+overtxt DB     '                        _   _   _   _     _   _   _   _                        ', 0
+        DB     '                       / \ / \ / \ / \   / \ / \ / \ / \                       ', 0
+        DB     '                      ( G | A | M | E ) ( O | V | E | R )                      ', 0
+        DB     '                       \_/ \_/ \_/ \_/   \_/ \_/ \_/ \_/                       $', 0
 
 starttune DW     E, 5
         DW     D, 2
@@ -111,11 +120,16 @@ overtune DW     E, 5
 
         DW     00h, 00h
 
+shoottune DW     E, 1
+
+        DW     00h, 00h
+
 arrs    DB     80 DUP(-1)
 arre    DB     80 DUP(-1)
 arrd    DB     80 DUP(0)
 arrc    DB     80 DUP(0)
 
+delay   DW     ?
 seed80  DB     ?
 seed36  DB     ?
 
@@ -158,17 +172,20 @@ mode:
 
         CMP    m, 0             ; easy mode
         JNE    checkmode1
-        MOV    delay, 010h
+        MOV    ax, easydelay
+        MOV    delay, ax
         JMP    begin
 
 checkmode1:
         CMP    m, 1             ; medium mode
         JNE    checkmode2
-        MOV    delay, 06h
+        MOV    ax, mediumdelay
+        MOV    delay, ax
         JMP    begin
 
 checkmode2:
-        MOV    delay, 02h
+        MOV    ax, harddelay
+        MOV    delay, ax
 
 begin:
         MOV    ah, 00h          ; set video mode to 80x25
@@ -349,6 +366,10 @@ cont:
         MOV    ah, 00h          ; get character from buffer
         INT    16h
 
+        CMP    al, 27
+        JE     ddexit
+        ; call    exit
+
         MOV    cx, 80
 cmplp:
         PUSH   cx
@@ -391,6 +412,8 @@ ctn5:
 incsc:
         INC    score
 
+        CALL   shootsound
+
         XOR    dx, dx
         MOV    ax, score
         MOV    cx, 100
@@ -412,6 +435,13 @@ incsc:
         MOV    bh, 0
         MOV    cx, 1
         INT    10h
+
+;-------------------- DUMMY --------------------
+        JMP    skip3
+ddexit:
+        JMP    dexit
+skip3:
+;-----------------------------------------------
 
 ctn8:
         POP    ax
@@ -591,10 +621,16 @@ dummy:
         JMP   dmnlp
 ; end mnlp loop
 
-exit:   ; TODO GAME OVER PAGE
+exit:
         MOV    ah, 00h          ; set video mode to 80x25
         MOV    al, 03h
         INT    10h
+
+        MOV    ah, 01h
+        MOV    cx, 2607h
+        INT    10h
+
+        CALL   printover
 
         RET
         .exit
@@ -631,9 +667,9 @@ rand36:
         MOV    ah, 00h
         MOV    al, seed36
 
-        MOV    cx, 37           ; linear congruential generator
+        MOV    cx, a36           ; linear congruential generator
         MUL    cx
-        ADD    ax, 17
+        ADD    ax, c36
 
 
 
@@ -902,6 +938,55 @@ PauseIt:
         ; MOV    cx, 00h
         MOV    dx, 00h
         INT    15h
+
+        RET
+
+printover:
+        MOV    ah, 02h          ; move cursor to
+        MOV    dl, 0           ;     column 0
+        MOV    dh, 9           ;     row 9
+        MOV    bh, 0
+        INT    10h
+
+        MOV     ah, 09h
+        MOV     dx, offset overtxt
+        INT     21h
+
+        CALL   oversound
+
+        RET
+
+oversound:
+        push ds
+        pop  es
+        mov  si, offset overtune
+
+        mov  dx,61h                  ; turn speaker on
+        in   al,dx                   ;
+        or   al,03h                  ;
+        out  dx,al                   ;
+        mov  dx,43h                  ; get the timer ready
+        mov  al,0B6h                 ;
+        out  dx,al                   ;
+
+        CALL   LoopIt
+
+        RET
+
+shootsound:
+        push ds
+        pop  es
+        mov  si, offset shoottune
+
+        mov  dx,61h                  ; turn speaker on
+        in   al,dx                   ;
+        or   al,03h                  ;
+        out  dx,al                   ;
+        mov  dx,43h                  ; get the timer ready
+        mov  al,0B6h                 ;
+        out  dx,al                   ;
+
+        CALL   LoopIt
 
         RET
 
