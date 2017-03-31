@@ -1,14 +1,14 @@
         .model tiny
 
 ;------------------ SOUND DEF ------------------
-Bj = 2415       ; B low
+Bj = 2415                               ; B low
 C = 2280
-Ck = 2152       ; C#
+Ck = 2152                               ; C#
 D = 2031
-Dk = 1917       ; D#
+Dk = 1917                               ; D#
 E = 1809
 F = 1715
-Fk = 1612       ; F#
+Fk = 1612                               ; F#
 G = 1521
 A = 1355
 B = 1207
@@ -22,13 +22,13 @@ mediumdelay     DW     02h
 harddelay       DW     01h
 
 ; repeat n time(s) then new column begin
-rptN    DW     3       ; default: 3
+rptN    DW     3                        ; default: 3
 
 ; variables in linear congruential generator
-a80     DW     81       ; a (default: 81)
-c80     DW     17       ; c (default: 17)
-a36     DW     37       ; a (default: 37)
-c36     DW     7       ; c (default: 7)
+a80     DW     81                       ; a (default: 81)
+c80     DW     17                       ; c (default: 17)
+a36     DW     37                       ; a (default: 37)
+c36     DW     7                        ; c (default: 7)
 
 ; colors of matrix
 color   DB     0Fh, 0Ah, 02h, 07h, 08h
@@ -77,7 +77,7 @@ overtxt DB     '                        _   _   _   _     _   _   _   _         
         DB     '                       \_/ \_/ \_/ \_/   \_/ \_/ \_/ \_/                       $', 0
 
 ;------------------- SOUND -------------------
-starttune DW     E, 5
+starttune DW     E, 5                   ; start sound
         DW     D, 2
         DW     C, 4
         DW     D, 4
@@ -100,7 +100,7 @@ starttune DW     E, 5
 
         DW     00h, 00h
 
-overtune DW     E, 5
+overtune DW     E, 5                    ; game over sound
         DW     D, 2
         DW     C, 4
         DW     D, 4
@@ -119,7 +119,7 @@ overtune DW     E, 5
 
         DW     00h, 00h
 
-shoottune DW     E, 1
+shoottune DW     E, 1                   ; shoot sound
 
         DW     00h, 00h
 
@@ -502,8 +502,6 @@ dellp:
         POP    cx
         LOOP   dellp
 ; end dellp loop
-
-        JMP    cont2
 
 cont2:
         MOV    di, i
