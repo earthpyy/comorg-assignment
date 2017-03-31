@@ -404,7 +404,7 @@ incsc:
 ;-------------------- DUMMY --------------------
         JMP    skip3
 ddexit:
-        JMP    dexit
+        JMP    exitgame
 skip3:
 ;-----------------------------------------------
 
@@ -594,7 +594,14 @@ exit:
 
         CALL   printover                ; show game over page
 
-        RET
+        JMP    mode
+
+exitgame:
+        MOV    ah, 00h                  ; clear screen
+        MOV    al, 03h
+        INT    10h
+
+        ; RET
         .exit                           ; exit game
 
 ;------------------- DELAY FN ------------------
@@ -848,12 +855,18 @@ checkup:
 
 checkdown:
         CMP    ah, 80                   ; arrow down
-        JNE    checkenter
+        JNE    checkesc
 
         CMP    m, 2
         JE     inflp
         INC    m                        ; increase menu
         JMP    modeselect
+
+checkesc:
+        CMP    al, 27                   ; esc
+        JNE    checkenter
+
+        JMP    exitgame                 ; exit game
 
 checkenter:
         CMP    al, 13                   ; carriage return
