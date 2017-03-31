@@ -582,6 +582,23 @@ dummy:
 ; end mnlp loop
 
 exit:
+        MOV    cx, 80
+reall:
+        PUSH   cx
+
+        SUB    cx, 1
+        MOV    di, cx
+        MOV    [arrs + di], -1          ; reset start row of column i
+        MOV    [arre + di], -1          ; reset end row of column i
+
+        MOV    score, 0
+        MOV    hp, 10
+        MOV    m, 0
+
+        POP    cx
+        LOOP   reall
+; end reall loop
+
         MOV    ah, 00h                  ; clear screen
         MOV    al, 03h
         INT    10h
