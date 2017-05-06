@@ -1,16 +1,16 @@
-Spicy Beef Nacho$069@05%
-Double Cheese Pizza$069@05%
-Pepperoni Pizza$069@05%
-Chicken Kabab$069@05%
-Crispy Shrimp$069@05%
-BBQ Burger$069@05%
-Garlic Bread$069@05%
-Smoked Salmon$069@05%
-Tuna Salad$069@05%
-Papaya Salad$069@05%
-Sweet Corn Soup$069@05%
-Deep Fried Chicken$069@05%
-Ham Omelette$069@05%
-Green Curry$069@05%
-Mein Noodles$069@05%
+Spicy Beef Nacho$069@
+Double Cheese Pizza$069@
+Pepperoni Pizza$069@
+Chicken Kabab$069@
+Crispy Shrimp$069@
+BBQ Burger$069@
+Garlic Bread$069@
+Smoked Salmon$069@
+Tuna Salad$069@
+Papaya Salad$069@
+Sweet Corn Soup$069@
+Deep Fried Chicken$069@
+Ham Omelette$069@
+Green Curry$069@
+Mein Noodles$069@
 #
