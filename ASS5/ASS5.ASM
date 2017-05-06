@@ -27,7 +27,7 @@ pFrame      DB     219, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 2
             ; DB     219, '                                                                              ', 219
             DB     223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, 223, '$', 0
 
-storeName   DB     'CE REST-TAURANT$', 0
+storeName   DB     'CE REST-TAURANT                                             $', 0
 
 mS_order    DB     'Order Now!$', 0
 mS_status   DB     'Status/Cart$', 0
@@ -35,18 +35,35 @@ mS_game     DB     'Games$', 0
 mS_call     DB     'Call waiter/waitress$', 0
 mS_bill     DB     'Bill$', 0
 
-back        DB     'Press `b` to go back..$', 0
+back        DB     '[B]ack$', 0
+
 con_order   DB     'Are you sure you want to order?$', 0
 con_remove  DB     'Are you sure you want to remove?$', 0
+con_adderr  DB     'Cannot order anymore..$', 0
 con_yesno   DB     'YES :)               NO :($', 0
-cart_txt    DB     'Cart x   | THB $', 0
+con_back    DB     '          [B]ack$', 0
+
+cart_txt    DB     'Cart x   | THB $    ', 0
+
 bf_price    DB     ' (THB $', 0
 at_price    DB     ')$', 0
+
 st_none     DB     'You have not order anything yet!$', 0
-st_sub      DB     '     Subtotal:   THB $', 0
-st_vat      DB     '      VAT(7%):   THB $', 0
-st_svch     DB     ' Service(10%):   THB $', 0
-st_total    DB     '        Total:   THB $', 0
+st_sub      DB     '     Subtotal:   THB     $', 0
+st_vat      DB     '      VAT(7%):   THB     $', 0
+st_svch     DB     ' Service(10%):   THB     $', 0
+st_total    DB     '        Total:   THB     $', 0
+
+bc_order    DB     '> Order$', 0
+bc_orderC   DB     '> Order > Chef Recommended!$', 0
+bc_orderP   DB     '> Order > Popular Dishes$', 0
+bc_orderN   DB     '> Order > New Items$', 0
+bc_orderA   DB     '> Order > View All$', 0
+bc_status   DB     '> Status$', 0
+bc_game     DB     '> Games$', 0
+bc_bill     DB     '> Bill$', 0
+bc_confirm  DB     '> Confirm$', 0
+bc_error    DB     '> Error!$', 0
 
 foodType    DB     219, '                             Chef Recommended!                                ', 219
             DB     219, '                                                                              ', 219
@@ -56,10 +73,16 @@ foodType    DB     219, '                             Chef Recommended!         
             DB     219, '                                                                              ', 219
             DB     219, '                             View All                                         ', 219, '$', 0
 
-fL_chef     DB     1, 2, 6, 8, -1
+fL_chef     DB     18 DUP(-1)
+fL_pop      DB     18 DUP(-1)
+fL_new      DB     18 DUP(-1)
 
-fL_sel      DB     30 DUP(-1)
-; fL_sel      DB     1, 3, 2
+; fL_all_N    DB     ?
+fL_chef_N   DB     ?
+fL_pop_N    DB     ?
+fL_new_N    DB     ?
+
+fL_sel      DB     50 DUP(-1)
 fL_i        DW     0
 fL_j        DW     0
 fL_price    DW     0
@@ -77,7 +100,8 @@ n           DB     ?
 price_tmp   DW     ?
 Vnum        DW     ?
 
-foodFile    DB     "X:\PROJ\COMORG~1\ASS5\TXT\FOOD2.TXT", 0
+foodFile    DB     "X:\PROJ\COMORG~1\ASS5\TXT\FOOD.TXT", 0
+foodLFile   DB     "X:\PROJ\COMORG~1\ASS5\TXT\FOODL.TXT", 0
 buf         DB     ?
 
             .code
@@ -103,6 +127,8 @@ main:
 
             CALL   pntCart
 
+            CALL   loadFoodList
+
 page2:
             MOV    ah, 05h
             MOV    al, 01h
@@ -118,7 +144,12 @@ page2:
             MOV    dx, offset storeName
             CALL   pntTxt
 
-            ; CALL   pntCart
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_confirm
+            CALL   pntTxt
 
             MOV    Vrow, 10
             MOV    Vcol, 24
@@ -153,7 +184,12 @@ page3:
             MOV    dx, offset storeName
             CALL   pntTxt
 
-            ; CALL   pntCart
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_confirm
+            CALL   pntTxt
 
             MOV    Vrow, 10
             MOV    Vcol, 23
@@ -167,6 +203,46 @@ page3:
             CALL   moveCursor3
 
             MOV    dx, offset con_yesno
+            CALL   pntTxt
+
+            ; MOV    ah, 05h
+            ; MOV    al, 00h
+            ; INT    10h
+
+page4:
+            MOV    ah, 05h
+            MOV    al, 03h
+            INT    10h
+
+            MOV    dx, offset pFrame
+            CALL   pntTxt
+
+            MOV    Vrow, 01h
+            MOV    Vcol, 02h
+            CALL   moveCursor4
+
+            MOV    dx, offset storeName
+            CALL   pntTxt
+
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_error
+            CALL   pntTxt
+
+            MOV    Vrow, 10
+            MOV    Vcol, 28
+            CALL   moveCursor4
+
+            MOV    dx, offset con_adderr
+            CALL   pntTxt
+
+            MOV    Vrow, 12
+            MOV    Vcol, 26
+            CALL   moveCursor4
+
+            MOV    dx, offset con_back
             CALL   pntTxt
 
             MOV    ah, 05h
@@ -213,6 +289,13 @@ mOrder:
             CALL   changeScr
             CALL   pntFoodType
 
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_order
+            CALL   pntTxt
+
             MOV    Vrow, 7
             MOV    Vam, 4
             CALL   makeArrow
@@ -224,26 +307,33 @@ mOrder:
             JNE    mOrder_0
             CALL   moChef
             JMP    mOrder
-mOrder_0:
-            ;
-            ; CMP    m, 1
-            ; JNE    mOrder_1
-            ; CALL   moPop
-            ; JMP    mOrder
-; mOrder_1:
-            ; CMP    m, 2
-            ; JNE    mOrder_2
-            ; CALL   moNew
-            ; JMP    mOrder
-; mOrder_2:
-            CMP    m, 3
-            JNE    mOrder_3
-            CALL   moAll
-            JMP    mOrder
-mOrder_3:
-            RET
+            mOrder_0:
+
+                        CMP    m, 1
+                        JNE    mOrder_1
+                        CALL   moPop
+                        JMP    mOrder
+            mOrder_1:
+                        CMP    m, 2
+                        JNE    mOrder_2
+                        CALL   moNew
+                        JMP    mOrder
+            mOrder_2:
+                        CMP    m, 3
+                        JNE    mOrder_3
+                        CALL   moAll
+                        JMP    mOrder
+            mOrder_3:
+                        RET
 
 moChef:
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_orderC
+            CALL   pntTxt
+
             MOV    ah, 3Dh
             MOV    dx, offset foodFile
             MOV    al, 00h
@@ -296,8 +386,21 @@ moChef:
                         MOV    ah, 3Eh
                         INT    21h
 
-                        MOV    Vam, 4
+                        CMP    fL_chef_N, 9
+                        JLE    moChef_lp_con2
+
+                        MOV    al, fL_chef_N
+                        SUB    al, 9
+                        MOV    Vam, 9
+                        MOV    Vam2, al
+
+                        JMP    moChef_lp_con3
+
+            moChef_lp_con2:
+                        MOV    al, fL_chef_N
+                        MOV    Vam, al
                         MOV    Vam2, 0
+            moChef_lp_con3:
                         CALL   makeArrow2
 
                         CMP    m, -1
@@ -311,6 +414,14 @@ moChef:
                         CMP    n, 0
                         JE     moChef_out
 
+                        CMP    fL_i, 8
+                        JNE    moChef_confirm_con
+
+                        MOV    al, 03h
+                        CALL   showConfirm
+                        JMP    moChef_out
+
+            moChef_confirm_con:
                         MOV    di, fL_j
                         MOV    ah, 00h
                         MOV    al, m
@@ -331,7 +442,14 @@ moChef:
                         ; JMP    moChef
                         RET
 
-moAll:
+moPop:
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_orderP
+            CALL   pntTxt
+
             MOV    ah, 3Dh
             MOV    dx, offset foodFile
             MOV    al, 00h
@@ -346,6 +464,239 @@ moAll:
 
             MOV    di, 0
             MOV    i, 0
+            MOV    j, 0
+            MOV    Vcol, 10
+
+            moPop_lp:
+                        MOV    al, j
+                        MOV    ah, 2
+                        MUL    ah
+
+                        MOV    Vrow, 5
+                        ADD    Vrow, al
+                        CALL   moveCursor
+
+                        MOV    al, j
+                        MOV    ah, 0
+                        MOV    si, ax
+                        MOV    bl, i
+                        CMP    bl, fL_pop[si]
+                        JNE    moPop_lp_con0
+                        CALL   pntBufCost
+                        INC    j
+                        JMP    moPop_lp_con1
+            moPop_lp_con0:
+                        CALL   skipBuf
+            moPop_lp_con1:
+                        INC    i
+
+                        CMP    j, 9
+                        JL     moPop_lp_con
+                        MOV    j, 0
+                        MOV    Vcol, 50
+
+            moPop_lp_con:
+                        CMP    buf[di], '#'
+                        JNE    moPop_lp
+
+                        MOV    ah, 3Eh
+                        INT    21h
+
+                        CMP    fL_pop_N, 9
+                        JLE    moPop_lp_con2
+
+                        MOV    al, fL_pop_N
+                        SUB    al, 9
+                        MOV    Vam, 9
+                        MOV    Vam2, al
+
+                        JMP    moPop_lp_con3
+
+            moPop_lp_con2:
+                        MOV    al, fL_pop_N
+                        MOV    Vam, al
+                        MOV    Vam2, 0
+            moPop_lp_con3:
+                        CALL   makeArrow2
+
+                        CMP    m, -1
+                        JNE    moPop_confirm
+                        JMP    moPop_out
+
+            moPop_confirm:
+                        MOV    al, 01h
+                        CALL   showConfirm
+
+                        CMP    n, 0
+                        JE     moPop_out
+
+                        CMP    fL_i, 8
+                        JNE    moPop_confirm_con
+
+                        MOV    al, 03h
+                        CALL   showConfirm
+                        JMP    moPop_out
+
+            moPop_confirm_con:
+                        MOV    di, fL_j
+                        MOV    ah, 00h
+                        MOV    al, m
+                        MOV    si, ax
+                        MOV    al, fL_pop[si]
+                        MOV    fL_sel[di], al
+
+                        MOV    j, al
+                        CALL   getCost
+                        MOV    ax, price_tmp
+                        ADD    fL_price, ax
+
+                        INC    fL_i
+                        INC    fL_j
+
+            moPop_out:
+                        CALL   clearScr
+                        ; JMP    moPop
+                        RET
+
+moNew:
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_orderN
+            CALL   pntTxt
+
+            MOV    ah, 3Dh
+            MOV    dx, offset foodFile
+            MOV    al, 00h
+            INT    21h
+
+            MOV    bx, ax
+
+            MOV    ah, 3Fh
+            MOV    cx, 1000
+            MOV    dx, offset buf
+            INT    21h
+
+            MOV    di, 0
+            MOV    i, 0
+            MOV    j, 0
+            MOV    Vcol, 10
+
+            moNew_lp:
+                        MOV    al, j
+                        MOV    ah, 2
+                        MUL    ah
+
+                        MOV    Vrow, 5
+                        ADD    Vrow, al
+                        CALL   moveCursor
+
+                        MOV    al, j
+                        MOV    ah, 0
+                        MOV    si, ax
+                        MOV    bl, i
+                        CMP    bl, fL_new[si]
+                        JNE    moNew_lp_con0
+                        CALL   pntBufCost
+                        INC    j
+                        JMP    moNew_lp_con1
+            moNew_lp_con0:
+                        CALL   skipBuf
+            moNew_lp_con1:
+                        INC    i
+
+                        CMP    j, 9
+                        JL     moNew_lp_con
+                        MOV    j, 0
+                        MOV    Vcol, 50
+
+            moNew_lp_con:
+                        CMP    buf[di], '#'
+                        JNE    moNew_lp
+
+                        MOV    ah, 3Eh
+                        INT    21h
+
+                        CMP    fL_new_N, 9
+                        JLE    moNew_lp_con2
+
+                        MOV    al, fL_new_N
+                        SUB    al, 9
+                        MOV    Vam, 9
+                        MOV    Vam2, al
+
+                        JMP    moNew_lp_con3
+
+            moNew_lp_con2:
+                        MOV    al, fL_new_N
+                        MOV    Vam, al
+                        MOV    Vam2, 0
+            moNew_lp_con3:
+                        CALL   makeArrow2
+
+                        CMP    m, -1
+                        JNE    moNew_confirm
+                        JMP    moNew_out
+
+            moNew_confirm:
+                        MOV    al, 01h
+                        CALL   showConfirm
+
+                        CMP    n, 0
+                        JE     moNew_out
+
+                        CMP    fL_i, 8
+                        JNE    moNew_confirm_con
+
+                        MOV    al, 03h
+                        CALL   showConfirm
+                        JMP    moNew_out
+
+            moNew_confirm_con:
+                        MOV    di, fL_j
+                        MOV    ah, 00h
+                        MOV    al, m
+                        MOV    si, ax
+                        MOV    al, fL_new[si]
+                        MOV    fL_sel[di], al
+
+                        MOV    j, al
+                        CALL   getCost
+                        MOV    ax, price_tmp
+                        ADD    fL_price, ax
+
+                        INC    fL_i
+                        INC    fL_j
+
+            moNew_out:
+                        CALL   clearScr
+                        ; JMP    moNew
+                        RET
+
+moAll:
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_orderA
+            CALL   pntTxt
+
+            MOV    ah, 3Dh
+            MOV    dx, offset foodFile
+            MOV    al, 00h
+            INT    21h
+
+            MOV    bx, ax
+
+            MOV    ah, 3Fh
+            MOV    cx, 1000
+            MOV    dx, offset buf
+            INT    21h
+
+            MOV    di, 0
+            MOV    i, 0
+            MOV    j, 0
             MOV    Vcol, 10
 
             moAll_lp:
@@ -360,6 +711,7 @@ moAll:
                         CALL   pntBufCost
 
                         INC    i
+                        INC    j
 
                         CMP    i, 9
                         JL     moAll_lp_con
@@ -373,16 +725,68 @@ moAll:
                         MOV    ah, 3Eh
                         INT    21h
 
+                        CMP    j, 9
+                        JLE    moAll_lp_con2
+
+                        MOV    al, j
+                        SUB    al, 9
                         MOV    Vam, 9
-                        MOV    Vam2, 6
+                        MOV    Vam2, al
+
+                        JMP    moAll_lp_con3
+
+            moAll_lp_con2:
+                        MOV    al, j
+                        MOV    Vam, al
+                        MOV    Vam2, 0
+            moAll_lp_con3:
                         CALL   makeArrow2
 
+                        CMP    m, -1
+                        JNE    moAll_confirm
+                        JMP    moAll_out
 
-                        CALL   inf  ; temp
+            moAll_confirm:
+                        MOV    al, 01h
+                        CALL   showConfirm
+
+                        CMP    n, 0
+                        JE     moAll_out
+
+                        CMP    fL_i, 8
+                        JNE    moAll_confirm_con
+
+                        MOV    al, 03h
+                        CALL   showConfirm
+                        JMP    moAll_out
+
+            moAll_confirm_con:
+                        MOV    al, m
+                        MOV    di, fL_j
+                        MOV    fL_sel[di], al
+
+                        MOV    j, al
+                        CALL   getCost
+                        MOV    ax, price_tmp
+                        ADD    fL_price, ax
+
+                        INC    fL_i
+                        INC    fL_j
+
+            moAll_out:
+                        CALL   clearScr
+                        ; JMP    moAll
                         RET
 
 mStatus:
             CALL   changeScr
+
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_status
+            CALL   pntTxt
 
             MOV    Vrow, 5
             MOV    Vcol, 50
@@ -498,6 +902,10 @@ mStatus:
                         MOV    Vam2, 0
                         CALL   makeArrow2
 
+                        CMP    m, -1
+                        JNE    mStatus_confirm
+                        RET
+
             mStatus_confirm:
                         MOV    al, 02h
                         CALL   showConfirm
@@ -508,6 +916,13 @@ mStatus:
                         MOV    dl, m
                         MOV    dh, 00h
                         MOV    si, dx
+
+                        MOV    al, fL_sel[si]
+                        MOV    j, al
+                        CALL   getCost
+                        MOV    ax, price_tmp
+                        SUB    fL_price, ax
+
                         MOV    fL_sel[si], -1
 
                         DEC    fL_i
@@ -518,6 +933,13 @@ mStatus:
                         RET
 
 mGame:
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_game
+            CALL   pntTxt
+
             ; TODO: paste game from LOUIS
             RET
 
@@ -526,6 +948,13 @@ mCall:
             RET
 
 mBill:
+            MOV    Vrow, 1
+            MOV    Vcol, 18
+            CALL   moveCursor
+
+            MOV    dx, offset bc_bill
+            CALL   pntTxt
+
             ; TODO: bill calculation
             RET
 
@@ -548,6 +977,13 @@ waitForBack:
             RET
 
 clearScr:
+            MOV    Vrow, 01h
+            MOV    Vcol, 02h
+            CALL   moveCursor
+
+            MOV    dx, offset storeName
+            CALL   pntTxt
+
             CALL   pntCart
 
             MOV    Vrow, 02h
@@ -589,6 +1025,13 @@ clearScr:
             RET
 
 changeScr:
+            MOV    Vrow, 01h
+            MOV    Vcol, 02h
+            CALL   moveCursor
+
+            MOV    dx, offset storeName
+            CALL   pntTxt
+
             CALL   pntCart
 
             MOV    Vrow, 02h
@@ -662,6 +1105,13 @@ changeScr:
 
                         POP    cx
                         LOOP   changeScr_lp3
+
+            MOV    Vrow, 22
+            MOV    Vcol, 72
+            CALL   moveCursor
+
+            MOV    dx, offset back
+            CALL   pntTxt
 
             RET
 
@@ -751,9 +1201,10 @@ pntCart:
 ; al - page
 ;
 ; output:
-; n - 0->no, 1->yes
+; n - 0->no, 1->yes, 2->back
 ; ---------
 showConfirm:
+            MOV    i, al
             MOV    ah, 05h
             ; MOV    al, 01h
             INT    10h
@@ -774,9 +1225,17 @@ showConfirm:
 
             showConfirm_checkyes:
                         CMP    al, 'y'
-                        JNE    showConfirm_inflp
+                        JNE    showConfirm_checkback
                         MOV    n, 1
                         JMP    showConfirm_out
+
+            showConfirm_checkback:
+                        CMP    i, 3
+                        JNE    showConfirm_inflp
+                        CMP    al, 'b'
+                        JNE    showConfirm_inflp
+                        MOV    n, 2
+                        ; JMP    showConfirm_out
 
             showConfirm_out:
                         MOV    ah, 05h
@@ -1210,36 +1669,124 @@ getCost:
             getCost_out:
                         RET
 
+; -- loadFoodList --
+; input:
+; none
+;
+; output:
+; none
+; ---------
+loadFoodList:
+            MOV    ah, 3Dh
+            MOV    dx, offset foodLFile
+            MOV    al, 00h
+            INT    21h
 
-            ; MOV    ah, 02h
-            ; getCost_rpt:
-            ;             MOV    dl, buf[di]
-            ;             INT    21h
-            ;
-            ;             INC    di
-            ;             CMP    buf[di], '$'
-            ;             JNE    getCost_rpt
-            ;
-            ;             INC    di
-            ;             MOV    dl, buf[di]
-            ;             MOV    price_tmp, 0
-            ; getCost_lp:
-            ;             MOV    ax, price_tmp
-            ;             MOV    cx, 10
-            ;             MUL    cx
-            ;             MOV    price_tmp, ax
-            ;
-            ;             SUB    dl, '0'
-            ;             ADD    price_tmp, dl
-            ;
-            ;             INC    di
-            ;             MOV    dl, buf[di]
-            ;             CMP    dl, '@'
-            ;             JNE    getCost_lp1
-            ;
-            ;             ADD    di, 9
+            MOV    bx, ax
 
-            ; RET
+            MOV    ah, 3Fh
+            MOV    cx, 1000
+            MOV    dx, offset buf
+            INT    21h
+
+            MOV    di, 0
+            MOV    si, 0
+
+            loadFoodList_lp:
+                        CMP    buf[di], '$'
+                        JE     loadFoodList_con
+
+                        ; CMP    buf[di], '0'
+                        ; JE     loadFoodList_lp_con
+
+                        MOV    al, buf[di]
+                        SUB    al, '0'
+                        MOV    ah, 10
+                        MUL    ah
+                        MOV    fL_chef[si], al
+
+                        INC    di
+
+                        MOV    al, buf[di]
+                        SUB    al, '0'
+                        ADD    fL_chef[si], al
+
+                        INC    si
+
+                        ADD    di, 2
+                        JMP    loadFoodList_lp
+
+            loadFoodList_con:
+                        MOV    ax, si
+                        MOV    fL_chef_N, al
+                        MOV    si, 0
+                        ADD    di, 2
+            loadFoodList_lp1:
+                        CMP    buf[di], '$'
+                        JE     loadFoodList_con1
+
+                        ; CMP    buf[di], '0'
+                        ; JE     loadFoodList_lp_con
+
+                        MOV    al, buf[di]
+                        SUB    al, '0'
+                        MOV    ah, 10
+                        MUL    ah
+                        MOV    fL_pop[si], al
+
+                        INC    di
+
+                        MOV    al, buf[di]
+                        SUB    al, '0'
+                        ADD    fL_pop[si], al
+
+                        INC    si
+
+                        ADD    di, 2
+                        JMP    loadFoodList_lp1
+
+            loadFoodList_con1:
+                        MOV    ax, si
+                        MOV    fL_pop_N, al
+                        MOV    si, 0
+                        ADD    di, 2
+            loadFoodList_lp2:
+                        CMP    buf[di], '$'
+                        JE     loadFoodList_out
+
+                        ; CMP    buf[di], '0'
+                        ; JE     loadFoodList_lp_con
+
+                        MOV    al, buf[di]
+                        SUB    al, '0'
+                        MOV    ah, 10
+                        MUL    ah
+                        MOV    fL_new[si], al
+
+                        INC    di
+
+                        MOV    al, buf[di]
+                        SUB    al, '0'
+                        ADD    fL_new[si], al
+
+                        INC    si
+
+                        ADD    di, 2
+                        JMP    loadFoodList_lp2
+
+            loadFoodList_out:
+                        MOV    ax, si
+                        MOV    fL_new_N, al
+
+                        MOV    ah, 3Eh
+                        INT    21h
+
+                        ; ADD    al, fL_chef_N
+                        ; ADD    al, fL_pop_N
+                        ;
+                        ; MOV    fL_all_N, al
+
+                        RET
 
 ; -- moveCursor --
 ; input:
@@ -1287,6 +1834,21 @@ moveCursor3:
             MOV    dh, Vrow
             MOV    dl, Vcol
             MOV    bh, 02h
+            INT    10h
+
+            ; POP    bx
+            ; POP    ax
+
+            RET
+
+moveCursor4:
+            ; PUSH   ax
+            ; PUSH   bx
+
+            MOV    ah, 02h
+            MOV    dh, Vrow
+            MOV    dl, Vcol
+            MOV    bh, 03h
             INT    10h
 
             ; POP    bx
